@@ -1,6 +1,3 @@
-"""
-Written by Josh!
-"""
 
 
 bl_info = {
@@ -13,17 +10,13 @@ bl_info = {
 import os
 
 import bpy
-from bpy.types import Operator, Scene, Panel
+from bpy.types import Operator
 
 
-Scene.export_folder = bpy.props.StringProperty(
-    name="Export folder", 
-    subtype="DIR_PATH", 
-    description="Directory to export the fbx files into."
-)
+bpy.types.Scene.export_folder = bpy.props.StringProperty(name="Export folder", subtype="DIR_PATH", description="Directory to export the fbx files into.")
 
 
-class BLENDER_TO_UNREAL_ENGINE_PT_Panel(Panel):
+class BLENDER_TO_UNREAL_ENGINE_PT_Panel(bpy.types.Panel):
     
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
@@ -41,7 +34,7 @@ class BLENDER_TO_UNREAL_ENGINE_PT_Panel(Panel):
         col = row.column()
         col.prop(context.scene, "export_folder", text="")
         col = row.column()
-        col.operator('open_folder_operator', text='', icon="FILE_TICK")
+        col.operator('object.bex_ot_openfolder', text='', icon="FILE_TICK")
         
         layout.label(text="Export Structures")
         row = layout.row()
@@ -69,28 +62,29 @@ def export_function(context, is_prop=False):
 
     for obj in selection:
         obj.select_set(True)
-                
+        
+        # Move object to origin if its a prop
         original_location = obj.location.copy()
-
-        # is_prop is True
-        if is_prop: bpy.ops.object.location_clear()
+        if is_prop:
+            bpy.ops.object.location_clear()
         
         bpy.ops.object.transform_apply(rotation=True, scale=True, location=False)
         
         view_layer.objects.active = obj
         name = bpy.path.clean_name(obj.name)
         fn = os.path.join(basedir, name) # the file path
-
         bpy.ops.export_scene.fbx(
             filepath=fn + ".fbx",
             use_selection=True,
             mesh_smooth_type='FACE',
             object_types={'MESH'},
             axis_forward='X',
-
         )
-        obj.select_set(False)                        
-        obj.location = original_location
+        obj.select_set(False)
+        
+        if is_prop:
+            obj.location = original_location
+
 
 
     view_layer.objects.active = obj_active
@@ -99,7 +93,9 @@ def export_function(context, is_prop=False):
         obj.select_set(True)
 
 
-class StructuresToUnrealEngine(Operator):
+
+
+class StructuresToUnrealEngine(bpy.types.Operator):
 
     bl_idname = "b2ue.structures"
     bl_label = "Export Structures"
@@ -109,7 +105,7 @@ class StructuresToUnrealEngine(Operator):
         return {'FINISHED'}
 
 
-class PropsToUnrealEngine(Operator):
+class PropsToUnrealEngine(bpy.types.Operator):
 
     bl_idname = "b2ue.props"
     bl_label = "Export Props"
@@ -119,9 +115,12 @@ class PropsToUnrealEngine(Operator):
         return {'FINISHED'}
 
 
-class BLENDER_TO_UNREAL_OT_OpenFolder(Operator):
+class BATEX_OT_OpenFolder(Operator):
+    """
+    Found from: https://github.com/jayanam/batex/blob/master/bex_folder_op.py
+    """
   
-    bl_idname = "open_folder_operator"
+    bl_idname = "object.bex_ot_openfolder"
     bl_label = "Open folder."
     bl_description = "Open the export folder" 
     bl_options = {'REGISTER'}
@@ -130,18 +129,13 @@ class BLENDER_TO_UNREAL_OT_OpenFolder(Operator):
         bpy.ops.wm.path_open(filepath=context.scene.export_folder)
         return {'FINISHED'}
 
-    
-register_fn, unregister_fn = bpy.utils.register_classes_factory((
-    BLENDER_TO_UNREAL_ENGINE_PT_Panel, 
-    StructuresToUnrealEngine, 
-    PropsToUnrealEngine, 
-    BLENDER_TO_UNREAL_OT_OpenFolder
-))
-    
-    
-def unregister():
-    unregister_fn()
-    
-    
+
+register_fn, unregister_fn = bpy.utils.register_classes_factory((BLENDER_TO_UNREAL_ENGINE_PT_Panel, StructuresToUnrealEngine, PropsToUnrealEngine, BATEX_OT_OpenFolder))
+
+
 def register():
     register_fn()
+
+
+def unregister():
+    unregister_fn()
