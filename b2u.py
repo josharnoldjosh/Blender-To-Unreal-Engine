@@ -130,12 +130,18 @@ class BLENDER_TO_UNREAL_OT_OpenFolder(Operator):
         bpy.ops.wm.path_open(filepath=context.scene.export_folder)
         return {'FINISHED'}
 
-
-if __name__ == "__main__":
-    register, unregister = bpy.utils.register_classes_factory((
-        BLENDER_TO_UNREAL_ENGINE_PT_Panel, 
-        StructuresToUnrealEngine, 
-        PropsToUnrealEngine, 
-        BLENDER_TO_UNREAL_OT_OpenFolder
-    ))
-    register()
+    
+register_fn, unregister_fn = bpy.utils.register_classes_factory((
+    BLENDER_TO_UNREAL_ENGINE_PT_Panel, 
+    StructuresToUnrealEngine, 
+    PropsToUnrealEngine, 
+    BLENDER_TO_UNREAL_OT_OpenFolder
+))
+    
+    
+def unregister():
+    unregister_fn()
+    
+    
+def register():
+    register_fn()
