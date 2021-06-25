@@ -36,6 +36,14 @@ class BLENDER_TO_UNREAL_ENGINE_PT_Panel(bpy.types.Panel):
         col = row.column()
         col.operator('object.bex_ot_openfolder', text='', icon="FILE_TICK")
         
+        layout.label(text="Auto UV")
+        row = layout.row()
+        row.operator("b2ue.autouv")
+        
+        layout.label(text="Auto Lightmap")
+        row = layout.row()
+        row.operator("b2ue.autolightmap")
+        
         layout.label(text="Export Structures")
         row = layout.row()
         row.operator("b2ue.structures")
@@ -54,7 +62,6 @@ def export_function(context, is_prop=False):
         raise Exception("Blend file is not saved")
 
     view_layer = bpy.context.view_layer
-
     obj_active = view_layer.objects.active
     selection = bpy.context.selected_objects
 
@@ -130,7 +137,69 @@ class BATEX_OT_OpenFolder(Operator):
         return {'FINISHED'}
 
 
-register_fn, unregister_fn = bpy.utils.register_classes_factory((BLENDER_TO_UNREAL_ENGINE_PT_Panel, StructuresToUnrealEngine, PropsToUnrealEngine, BATEX_OT_OpenFolder))
+class AutoUV(Operator):
+    bl_idname = "b2ue.autouv"
+    bl_label = "Auto UV"
+    
+    def execute(self, context):
+        view_layer = bpy.context.view_layer
+        obj_active = view_layer.objects.active
+        selection = bpy.context.selected_objects
+        bpy.ops.object.select_all(action='DESELECT')
+
+        for obj in selection:
+            obj.select_set(True)
+            bpy.ops.object.editmode_toggle()
+            
+#            mesh = context.active_object.data
+            mesh = obj.data
+            if len(mesh.uv_layers) == 0: mesh.uv_layers.new()
+            mesh.uv_layers.active_index = 0
+            mesh.uv_layers.active.name = "UVMap"
+            bpy.ops.uv.smart_project()
+            
+            bpy.ops.object.editmode_toggle()
+            obj.select_set(False)
+            
+        for obj in selection:
+            obj.select_set(True)
+            
+        return {'FINISHED'}
+    
+
+class AutoLightmap(Operator):
+    bl_idname = "b2ue.autolightmap"
+    bl_label = "Auto Lightmap"
+    
+    def execute(self, context):
+        view_layer = bpy.context.view_layer
+        obj_active = view_layer.objects.active
+        selection = bpy.context.selected_objects
+        bpy.ops.object.select_all(action='DESELECT')
+
+        for obj in selection:
+            obj.select_set(True)
+            bpy.ops.object.editmode_toggle()
+            
+            mesh = obj.data
+            if len(mesh.uv_layers) == 1: mesh.uv_layers.new()
+            mesh.uv_layers.active_index = 1
+            mesh.uv_layers.active.name = "Lightmap"
+            bpy.ops.uv.lightmap_pack(
+                PREF_IMG_PX_SIZE = 512,
+                PREF_MARGIN_DIV = 0.35
+            )
+            
+            bpy.ops.object.editmode_toggle()
+            obj.select_set(False)
+            
+        for obj in selection:
+            obj.select_set(True)
+            
+        return {'FINISHED'}
+
+
+register_fn, unregister_fn = bpy.utils.register_classes_factory((BLENDER_TO_UNREAL_ENGINE_PT_Panel, AutoUV, AutoLightmap, StructuresToUnrealEngine, PropsToUnrealEngine, BATEX_OT_OpenFolder))
 
 
 def register():
@@ -139,3 +208,7 @@ def register():
 
 def unregister():
     unregister_fn()
+    
+    
+if __name__=='__main__':
+    register()
