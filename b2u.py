@@ -156,6 +156,9 @@ class AutoUV(Operator):
             if len(mesh.uv_layers) == 0: mesh.uv_layers.new()
             mesh.uv_layers.active_index = 0
             mesh.uv_layers.active.name = "UVMap"
+            
+            bpy.ops.mesh.select_all(action='SELECT')
+            
             bpy.ops.uv.smart_project()
             
             bpy.ops.object.editmode_toggle()
@@ -185,6 +188,9 @@ class AutoLightmap(Operator):
             if len(mesh.uv_layers) == 1: mesh.uv_layers.new()
             mesh.uv_layers.active_index = 1
             mesh.uv_layers.active.name = "Lightmap"
+            
+            bpy.ops.mesh.select_all(action='SELECT')
+            
             bpy.ops.uv.lightmap_pack(
                 PREF_IMG_PX_SIZE = 512,
                 PREF_MARGIN_DIV = 0.35
