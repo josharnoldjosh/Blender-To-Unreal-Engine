@@ -28,7 +28,7 @@ class BLENDER_TO_UNREAL_ENGINE_PT_Panel(bpy.types.Panel):
         layout = self.layout
         
         row = layout.row()
-        row.label(text="Folder containing 'Props/' and 'Structures'")
+        row.label(text="Output Folder")
         
         row = layout.row()
         col = row.column()
@@ -43,12 +43,8 @@ class BLENDER_TO_UNREAL_ENGINE_PT_Panel(bpy.types.Panel):
         layout.label(text="Auto Lightmap")
         row = layout.row()
         row.operator("b2ue.autolightmap")
-        
-        layout.label(text="Export Structures")
-        row = layout.row()
-        row.operator("b2ue.structures")
-        
-        layout.label(text="Export Props")
+                
+        layout.label(text="Export")
         row = layout.row()
         row.operator("b2ue.props")
 
@@ -56,7 +52,7 @@ class BLENDER_TO_UNREAL_ENGINE_PT_Panel(bpy.types.Panel):
 
 def export_function(context, is_prop=False):
     
-    basedir = os.path.abspath(bpy.path.abspath(context.scene.export_folder)) + "/" + ("Props/" if is_prop else "Structures/")
+    basedir = os.path.abspath(bpy.path.abspath(context.scene.export_folder)) + "/"
 
     if not basedir:
         raise Exception("Blend file is not saved")
@@ -115,7 +111,7 @@ class StructuresToUnrealEngine(bpy.types.Operator):
 class PropsToUnrealEngine(bpy.types.Operator):
 
     bl_idname = "b2ue.props"
-    bl_label = "Export Props"
+    bl_label = "Export"
 
     def execute(self, context):
         export_function(context, is_prop=True)
