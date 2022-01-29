@@ -35,14 +35,6 @@ class BLENDER_TO_UNREAL_ENGINE_PT_Panel(bpy.types.Panel):
         col.prop(context.scene, "export_folder", text="")
         col = row.column()
         col.operator('object.bex_ot_openfolder', text='', icon="FILE_TICK")
-        
-        layout.label(text="Auto UV")
-        row = layout.row()
-        row.operator("b2ue.autouv")
-        
-        layout.label(text="Auto Lightmap")
-        row = layout.row()
-        row.operator("b2ue.autolightmap")
                 
         layout.label(text="Export")
         row = layout.row()
@@ -147,7 +139,6 @@ class AutoUV(Operator):
             obj.select_set(True)
             bpy.ops.object.editmode_toggle()
             
-#            mesh = context.active_object.data
             mesh = obj.data
             if len(mesh.uv_layers) == 0: mesh.uv_layers.new()
             mesh.uv_layers.active_index = 0
