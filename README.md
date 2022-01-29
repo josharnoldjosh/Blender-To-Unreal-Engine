@@ -8,7 +8,7 @@ This isn't designed to export any sort of armature or character rig, but more-so
 
 Simply select your objects, and hit `export`! Make sure you select your correct output folder location in your Unreal Engine Project folder.
 
-[An example image.](./example.png)
+![An example image.](./example.png)
 
 ## Notes
 
